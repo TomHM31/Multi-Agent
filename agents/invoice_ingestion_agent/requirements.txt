@@ -1,0 +1,18 @@
+# AWS SDK for Python
+boto3
+
+# For PostgreSQL database interaction (choose one or the other if using SQLAlchemy)
+psycopg2-binary
+# sqlalchemy
+
+# For Redis queue (if using Redis)
+# redis
+
+# For RabbitMQ queue (if using RabbitMQ)
+# pika
+
+# For loading environment variables from .env file (optional but good practice)
+python-dotenv
+
+# For HTTP requests (if downloading files from URLs in DB)
+requests

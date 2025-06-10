@@ -71,13 +71,47 @@
 
 ## B. Ingestion & Preprocessing (Agents 1–2)
 
-### Agent 1: Invoice Ingestion Agent
+### Agent 1: Invoice Ingestion Agent (invoice_ingestion_agent.py)
 
-- [ ] **ingest_from_s3.py**
-  - Monitor S3 `invoices-raw` via SNS/SQS or cron
-  - Download new files + metadata (key, size, timestamp)
-  - Log ingestion events to CloudWatch or local log
-  - Push file path & metadata to preprocessing queue (e.g. Redis)
+- [x] **Core Agent Structure & Main Loop** (`invoice_ingestion_agent.py`)
+  - [x] Configuration loading (env vars)
+  - [x] Logging setup
+  - [x] Metrics dictionary
+  - [x] State management (load, save, mark, check processed)
+  - [x] Placeholder for `publish_to_queue`
+  - [x] Main loop calling ingestion functions and sleeping
+- [ ] **Function: `ingest_from_s3()`**
+  - [ ] List objects in `S3_BUCKET_RAW` (using `boto3`)
+  - [ ] For each key not seen in `STATE_STORE_PATH`:
+    - [ ] Download to local “raw/” folder
+    - [ ] Infer vendor from filename or prefix
+    - [ ] Build message: `{ "file_path", "source_id", "vendor", "timestamp" }`
+    - [ ] Publish to `PREPROCESS_QUEUE_URL`
+    - [ ] Mark key in `STATE_STORE_PATH`
+  - [ ] Error handling & logging for S3 operations
+- [ ] **Function: `ingest_from_db()`**
+  - [ ] Connect to `DB_CONNECTION_STRING` (e.g., `sqlalchemy` or `psycopg2`)
+  - [ ] `SELECT id, vendor, file_url, uploaded_at FROM invoices WHERE processed=FALSE`
+  - [ ] For each row:
+    - [ ] Download `file_url` or locate local file
+    - [ ] `source_id = f"{vendor}_{id}"`
+    - [ ] Build & publish ingestion message (same schema as S3)
+    - [ ] `UPDATE invoices SET processed=TRUE WHERE id=…`
+  - [ ] Error handling & logging for DB operations
+- [ ] **Function: `ingest_from_email()`**
+  - [ ] Connect via `IMAP_HOST` / credentials (using `imaplib`, `email`)
+  - [ ] Search `UNSEEN` messages with “Invoice” in subject
+  - [ ] For each email:
+    - [ ] Parse attachments, save to “raw/”
+    - [ ] Infer vendor from sender or filename
+    - [ ] Publish ingestion message for each attachment
+    - [ ] Mark email as `SEEN`
+  - [ ] Error handling & logging for Email operations
+- [x] **Requirements File** (`agents/invoice_ingestion_agent/requirements.txt`)
+- [x] **Basic Test Structure** (`tests/agents/invoice_ingestion_agent/test_invoice_ingestion_agent.py`)
+  - [x] Fixtures for env vars and state file cleanup
+  - [x] Tests for state management functions
+  - [x] Placeholder tests for ingestion functions and main loop
 
 ### Agent 2: Preprocessing Agent
 
@@ -234,3 +268,7 @@
 - [ ] **Finalize & Commit**
   - Merge all changes, tag `phase0-complete`
   - Share link to docs and repo with team Slack/Email
+
+## Discovered During Work
+
+- [x] **Fix and pass all tests for the document_extraction_agent**
