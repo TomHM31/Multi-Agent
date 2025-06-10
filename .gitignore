@@ -1,6 +1,6 @@
 task_and_distance.csv
 *.pkl
-
+/mcp-servers
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
